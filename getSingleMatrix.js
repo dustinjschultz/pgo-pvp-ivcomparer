@@ -13,7 +13,7 @@ require('dotenv').config();
 
    // TODO: get these properly
    var myLeague = "Ultra League (Level 50)"
-   var myQuickfill = "TODO";
+   var myQuickfill = "Remix Meta";
    var myFriendlyShieldCount = 0; 
    var myOpposingShieldCount = 2; 
    
@@ -41,9 +41,9 @@ require('dotenv').config();
    // addScriptTag so it can be used on the page
    await page.addScriptTag({ content: `${setQuickFill}` });
    
-   await page.evaluateHandle((quickfill) => {
-      setQuickFill(quickfill);
-   }, myQuickfill);
+   await page.evaluateHandle((quickfill, index) => {
+      setQuickFill(quickfill, index);
+   }, myQuickfill, OPPOSING_INDEX);
    
    
    // addScriptTag so it can be used on the page
@@ -71,17 +71,17 @@ function setLeague(theLeague){
    var myLeaguesArray = Array.prototype.slice.call(document.querySelector('.league-select').children);
    var myLeagueIndex = myLeaguesArray.findIndex(myTestingFunction);
    document.querySelector('.league-select').selectedIndex = myLeagueIndex;
+   // TODO the dispatchEvent here isn't working
+   document.querySelector('.league-select').dispatchEvent(new Event('change'));
 }
 
 function setQuickFill(theQuickFill, theIndex){
-   // TODO: so this doesn't work as expected... all of them are
-   // present on in HTML, but only certain ones are available to pick
-   // see if there's a way to filter at the myQuickFillsArray step
-   // for only actually visible ones
-   var myTestingFunction = (element) => element.innerHTML.indexOf(theQuickFill) !== -1;
+   // need to enforce display = 'block' since PvPoke has all the options for all leagues present just hidden
+   var myTestingFunction = (element) => element.innerHTML.indexOf(theQuickFill) !== -1 && element.style.display == 'block';
    var myQuickFillsArray = Array.prototype.slice.call(document.querySelectorAll('.quick-fill-select')[theIndex].children);
    var myQuickFillsIndex = myQuickFillsArray.findIndex(myTestingFunction);
-   document.querySelectorAll('.quick-fill-select')[theIndex].click;
+   document.querySelectorAll('.quick-fill-select')[theIndex].selectedIndex = myQuickFillsIndex;
+   document.querySelectorAll('.quick-fill-select')[theIndex].dispatchEvent(new Event('change'));
 }
 
 function setShieldCount(theShieldCount, theIndex){

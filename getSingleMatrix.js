@@ -13,7 +13,7 @@ require('dotenv').config();
 
    // TODO: get these properly
    var myLeague = "Ultra League (Level 50)"
-   var myQuickfill = "Remix Meta";
+   var myQuickFillValue = "Remix Meta";
    var myFriendlyShieldCount = 0; 
    var myOpposingShieldCount = 2; 
    
@@ -29,13 +29,12 @@ require('dotenv').config();
 
    await setLeague(myLeague);
    
-   
    // addScriptTag so it can be used on the page
    await page.addScriptTag({ content: `${setQuickFill}` });
    
    await page.evaluateHandle((quickfill, index) => {
       setQuickFill(quickfill, index);
-   }, myQuickfill, OPPOSING_INDEX);
+   }, myQuickFillValue, OPPOSING_INDEX);
    
    
    // addScriptTag so it can be used on the page
@@ -55,20 +54,22 @@ require('dotenv').config();
 
 async function setLeague(theLeague){
    mySelectElement = await page.$('select.league-select');
+   // use .type since they don't have unique values (just the typing)
    await mySelectElement.type(theLeague);
 }
 
 function setQuickFill(theQuickFill, theIndex){
-   // TODO: use proper puppeteer instead of JS
+   // can't simply use native puppeteer since the <select> doesn't have a unique identifier to .select() on
    // need to enforce display = 'block' since PvPoke has all the options for all leagues present just hidden
    var myTestingFunction = (element) => element.innerHTML.indexOf(theQuickFill) !== -1 && element.style.display == 'block';
-   var myQuickFillsArray = Array.prototype.slice.call(document.querySelectorAll('.quick-fill-select')[theIndex].children);
-   var myQuickFillsIndex = myQuickFillsArray.findIndex(myTestingFunction);
-   document.querySelectorAll('.quick-fill-select')[theIndex].selectedIndex = myQuickFillsIndex;
+   var myQuickFillValuesArray = Array.prototype.slice.call(document.querySelectorAll('.quick-fill-select')[theIndex].children);
+   var myQuickFillValuesIndex = myQuickFillValuesArray.findIndex(myTestingFunction);
+   document.querySelectorAll('.quick-fill-select')[theIndex].selectedIndex = myQuickFillValuesIndex;
    document.querySelectorAll('.quick-fill-select')[theIndex].dispatchEvent(new Event('change'));
 }
 
 function setShieldCount(theShieldCount, theIndex){
-   // TODO: use proper puppeteer instead of JS
-   document.querySelectorAll(".multi .shield-select")[theIndex].selectedIndex = theShieldCount;  
+   // can't simply use native puppeteer since the <select> doesn't have a unique identifier to .select() on
+   document.querySelectorAll(".multi .shield-select")[theIndex].selectedIndex = theShieldCount;
+   document.querySelectorAll(".multi .shield-select")[theIndex].dispatchEvent(new Event('change'));
 }

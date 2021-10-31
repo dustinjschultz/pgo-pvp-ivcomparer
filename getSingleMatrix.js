@@ -23,18 +23,10 @@ require('dotenv').config();
 
    // ex: http://localhost/pvpoke/src/battle/matrix/
    var myUrl = `${process.env.PVPOKE_LOCALHOST_URL}battle/matrix/`;
-   console.log(myUrl);
    await page.goto(myUrl);
       
    page.waitForSelector('.add-poke-btn', {visible: true});
 
-   
-   // addScriptTag so it can be used on the page
-   // await page.addScriptTag({ content: `${setLeague}` });
-   
-   // await page.evaluateHandle((league) => {
-      // setLeague(league);
-   // }, myLeague);
    await setLeague(myLeague);
    
    
@@ -61,29 +53,13 @@ require('dotenv').config();
 
 })();
 
-
-
-function setLeague_old(theLeague){
-   // We don't know the index of the league, so we have to figure it out
-   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex
-   // https://stackoverflow.com/questions/9627289/javascript-check-if-div-contains-a-word
-   var myTestingFunction = (element) => element.innerHTML.indexOf(theLeague) !== -1;
-   var myLeaguesArray = Array.prototype.slice.call(document.querySelector('.league-select').children);
-   var myLeagueIndex = myLeaguesArray.findIndex(myTestingFunction);
-   document.querySelector('.league-select').selectedIndex = myLeagueIndex;
-   // TODO the dispatchEvent here isn't working
-   document.querySelector('.league-select').dispatchEvent(new Event('change'));
-}
-
-
 async function setLeague(theLeague){
-   console.log('new setLeague')
-   // await page.select('select.league-select', theLeague);
    mySelectElement = await page.$('select.league-select');
    await mySelectElement.type(theLeague);
 }
 
 function setQuickFill(theQuickFill, theIndex){
+   // TODO: use proper puppeteer instead of JS
    // need to enforce display = 'block' since PvPoke has all the options for all leagues present just hidden
    var myTestingFunction = (element) => element.innerHTML.indexOf(theQuickFill) !== -1 && element.style.display == 'block';
    var myQuickFillsArray = Array.prototype.slice.call(document.querySelectorAll('.quick-fill-select')[theIndex].children);
@@ -93,5 +69,6 @@ function setQuickFill(theQuickFill, theIndex){
 }
 
 function setShieldCount(theShieldCount, theIndex){
+   // TODO: use proper puppeteer instead of JS
    document.querySelectorAll(".multi .shield-select")[theIndex].selectedIndex = theShieldCount;  
 }

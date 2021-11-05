@@ -13,7 +13,7 @@ require('dotenv').config();
 
    // TODO: get these properly
    var myLeague = "Ultra League (Level 50)"
-   var myQuickFillValue = "Remix Meta";
+   var myQuickFillValue = "remixultra";
    var myFriendlyShieldCount = 0; 
    var myOpposingShieldCount = 2; 
    
@@ -28,16 +28,10 @@ require('dotenv').config();
    page.waitForSelector('.add-poke-btn', {visible: true});
 
    await setLeague(myLeague);
+   await setQuickFill(myQuickFillValue, OPPOSING_INDEX);
    
-   // addScriptTag so it can be used on the page
-   await page.addScriptTag({ content: `${setQuickFill}` });
-   
-   await page.evaluateHandle((quickfill, index) => {
-      setQuickFill(quickfill, index);
-   }, myQuickFillValue, OPPOSING_INDEX);
-   
-   await setQuickFill_new("Premier Cup Meta", 1);
-   
+   // TODO: refactor setShieldCount the same way setQuickFill works
+   // maybe even refactor the getSelector method to generalize it
    
    // addScriptTag so it can be used on the page
    await page.addScriptTag({ content: `${setShieldCount}` });
@@ -60,32 +54,25 @@ async function setLeague(theLeague){
    await mySelectElement.type(theLeague);
 }
 
-function setQuickFill(theQuickFill, theIndex){
-   // can't simply use native puppeteer since the <select> doesn't have a unique identifier to .select() on
-   // need to enforce display = 'block' since PvPoke has all the options for all leagues present just hidden
-   var myTestingFunction = (element) => element.innerHTML.indexOf(theQuickFill) !== -1 && element.style.display == 'block';
-   var myQuickFillValuesArray = Array.prototype.slice.call(document.querySelectorAll('.quick-fill-select')[theIndex].children);
-   var myQuickFillValuesIndex = myQuickFillValuesArray.findIndex(myTestingFunction);
-   document.querySelectorAll('.quick-fill-select')[theIndex].selectedIndex = myQuickFillValuesIndex;
-   document.querySelectorAll('.quick-fill-select')[theIndex].dispatchEvent(new Event('change'));
-}
-
-async function setQuickFill_new(theQuickFill, theIndex){
-   //var myParent = await page.$eval('.poke-select-container', (p) => { return p; });
-   //var myChildren = await page.$eval('.poke-select-container', (p) => { return p.children; });
-   //console.log(myChildren);
+async function setQuickFill(theQuickFill, theIndex){
    var mySelector = await buildQuickFillSelector(theIndex);
    var mySelectElement = await page.$(mySelector);
     // use .type since they don't have unique values (just the typing)
-   await mySelectElement.type(theQuickFill);
-   //console.log(myIndexWithinParent);
+    // TODO: DON'T use .type, it doesn't work
+   //await mySelectElement.type(theQuickFill);
+   await page.select(mySelector, theQuickFill);
 }
 
 async function buildQuickFillSelector(theIndex){
+   // this one's funny because we have to leverage :nth-child
+   // because we can't build a unique selector without it
+   // to find the applicable :nth-child, need to go to the shared 
+   // ancestor (.poke-select-container), and find the index within 
+   // the child list of the immediate child (.poke.multi) that 
+   // contains the element we care about (.quick-fill-select)
    var myIndexWithinParent = await page.evaluateHandle((index) => {
       var myRelevantChildren = document.querySelectorAll('.poke-select-container .poke.multi');
       var myRelevantChild = myRelevantChildren[index];
-      //var myQuickFillSelectElement = document.querySelectorAll('.quick-fill-select')[index]
       var myParent = myRelevantChild.parentNode;
       return Array.prototype.indexOf.call(myParent.children, myRelevantChild);
    }, theIndex);

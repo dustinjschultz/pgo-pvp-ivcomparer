@@ -57,9 +57,6 @@ async function setLeague(theLeague){
 async function setQuickFill(theQuickFill, theIndex){
    var mySelector = await buildQuickFillSelector(theIndex);
    var mySelectElement = await page.$(mySelector);
-    // use .type since they don't have unique values (just the typing)
-    // TODO: DON'T use .type, it doesn't work
-   //await mySelectElement.type(theQuickFill);
    await page.select(mySelector, theQuickFill);
 }
 

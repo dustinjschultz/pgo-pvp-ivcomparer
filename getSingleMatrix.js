@@ -67,16 +67,26 @@ async function buildQuickFillSelector(theIndex){
    // ancestor (.poke-select-container), and find the index within 
    // the child list of the immediate child (.poke.multi) that 
    // contains the element we care about (.quick-fill-select)
-   var myIndexWithinParent = await page.evaluateHandle((index) => {
-      var myRelevantChildren = document.querySelectorAll('.poke-select-container .poke.multi');
+   var myIndexWithinParent = await getIndexWithinParent('.poke-select-container', '.poke.multi', theIndex);   
+   var myNthChildNumber = myIndexWithinParent + 1;
+   return '.poke-select-container .poke.multi:nth-child(' + myNthChildNumber + ') .quick-fill-select';
+}
+
+async function getIndexWithinParent(theSingularParentSelector, theSiblingsSelector, theZeroIndexedOccurence){
+   // this lets us get the index within the parent of a given selector
+   // ex: parent class 'z', with children ['a', 'b', 'c', 'a', 'b', 'c']
+   // to get the 1st b's index: getIndexWithinParent('z', 'b', 0) == 1
+   // to get the 2nd b's index: getIndexWithinParent('z', 'b', 1) == 4
+   // useful for combining with .nth-child when you don't know the position in the parent
+   var myIndexWithinParent = await page.evaluateHandle((parent, child, index) => {
+      var myRelevantChildren = document.querySelectorAll(parent + " " + child);
       var myRelevantChild = myRelevantChildren[index];
       var myParent = myRelevantChild.parentNode;
       return Array.prototype.indexOf.call(myParent.children, myRelevantChild);
-   }, theIndex);
-   
+   }, theSingularParentSelector, theSiblingsSelector, theZeroIndexedOccurence);
+
    // not clue why I have to do ._remoteObject.value to get my number but whatever
-   var myNthChildNumber = myIndexWithinParent._remoteObject.value + 1;
-   return '.poke-select-container .poke.multi:nth-child(' + myNthChildNumber + ') .quick-fill-select';
+   return myIndexWithinParent._remoteObject.value;
 }
 
 function setShieldCount(theShieldCount, theIndex){

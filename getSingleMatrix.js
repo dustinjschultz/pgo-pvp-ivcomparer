@@ -29,23 +29,9 @@ require('dotenv').config();
 
    await setLeague(myLeague);
    await setQuickFill(myQuickFillValue, OPPOSING_INDEX);
-   
-   // TODO: refactor setShieldCount the same way setQuickFill works
-   // maybe even refactor the getSelector method to generalize it
-   await setShieldCount_new(myFriendlyShieldCount, FRIENDLY_INDEX);
-   await setShieldCount_new(myOpposingShieldCount, OPPOSING_INDEX);
-   
-   // addScriptTag so it can be used on the page
-   await page.addScriptTag({ content: `${setShieldCount}` });
-
-   // await page.evaluateHandle((count, index) => {
-      // setShieldCount(count, index);
-   // }, myFriendlyShieldCount, FRIENDLY_INDEX);
-   
-   // await page.evaluateHandle((count, index) => {
-      // setShieldCount(count, index);
-   // }, myOpposingShieldCount, OPPOSING_INDEX);
-   
+   await setShieldCount(myFriendlyShieldCount, FRIENDLY_INDEX);
+   await setShieldCount(myOpposingShieldCount, OPPOSING_INDEX);
+      
    setTimeout(() => {  console.log("World!"); }, 20000);
 
 })();
@@ -58,7 +44,6 @@ async function setLeague(theLeague){
 
 async function setQuickFill(theQuickFill, theIndex){
    var mySelector = await buildQuickFillSelector(theIndex);
-   //var mySelectElement = await page.$(mySelector);
    await page.select(mySelector, theQuickFill);
 }
 
@@ -91,7 +76,7 @@ async function getIndexWithinParent(theSingularParentSelector, theSiblingsSelect
    return myIndexWithinParent._remoteObject.value;
 }
 
-async function setShieldCount_new(theShieldCount, theIndex){
+async function setShieldCount(theShieldCount, theIndex){
    var mySelector = await buildShieldSelector(theIndex);
    await page.select(mySelector, theShieldCount.toString());
 }
@@ -100,10 +85,4 @@ async function buildShieldSelector(theIndex){
    var myIndexWithinParent = await getIndexWithinParent('.poke-select-container', '.poke.multi', theIndex);   
    var myNthChildNumber = myIndexWithinParent + 1;
    return '.poke-select-container .poke.multi:nth-child(' + myNthChildNumber + ') .shield-select';
-}
-
-function setShieldCount(theShieldCount, theIndex){
-   // can't simply use native puppeteer since the <select> doesn't have a unique identifier to .select() on
-   document.querySelectorAll(".multi .shield-select")[theIndex].selectedIndex = theShieldCount;
-   document.querySelectorAll(".multi .shield-select")[theIndex].dispatchEvent(new Event('change'));
 }

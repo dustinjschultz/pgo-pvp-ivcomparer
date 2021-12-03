@@ -4,7 +4,7 @@
 
 const puppeteer = require('puppeteer');
 require('dotenv').config();
-
+const AddMonData = require('./addMonClass.js');
 
 
 (async () => {
@@ -32,6 +32,9 @@ require('dotenv').config();
    await setShieldCount(myFriendlyShieldCount, FRIENDLY_INDEX);
    await setShieldCount(myOpposingShieldCount, OPPOSING_INDEX);
       
+   let myAddMonData = new AddMonData('a', 'b', 'c', 'd', 1, 2, 3);
+   console.log(myAddMonData);
+         
    setTimeout(() => {  console.log("World!"); }, 20000);
 
 })();
@@ -86,3 +89,5 @@ async function buildShieldSelector(theIndex){
    var myNthChildNumber = myIndexWithinParent + 1;
    return '.poke-select-container .poke.multi:nth-child(' + myNthChildNumber + ') .shield-select';
 }
+
+// async function addPokemon

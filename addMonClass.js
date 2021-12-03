@@ -1,5 +1,5 @@
 
-Class AddMonData{
+class AddMonData{
    name = "" // use the option's value attribute
    fastMove = "" // use the option's value attribute
    chargeMove1 = "" // use the option's value attribute
@@ -19,3 +19,5 @@ Class AddMonData{
    }
    
 }
+
+module.exports = AddMonData

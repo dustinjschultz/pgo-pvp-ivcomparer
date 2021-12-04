@@ -32,10 +32,10 @@ const AddMonData = require('./addMonClass.js');
    await setShieldCount(myFriendlyShieldCount, FRIENDLY_INDEX);
    await setShieldCount(myOpposingShieldCount, OPPOSING_INDEX);
       
-   let myAddMonData = new AddMonData('alakazam', 'PSYCHO_CUT', 'PSYCHIC', 'FUTURE_SIGHT', 1, 2, 3);
+   let myAddMonData = new AddMonData('alakazam', 'PSYCHO_CUT', 'PSYCHIC', 'FUTURE_SIGHT', 1, 10, 11);
    console.log(myAddMonData);
    
-   await triggerAddPokemonModal(FRIENDLY_INDEX);
+   await inputAddMonData(myAddMonData, FRIENDLY_INDEX);
    
    setTimeout(() => {  console.log("World!"); }, 20000);
 
@@ -74,6 +74,9 @@ async function getIndexWithinParent(theSingularParentSelector, theSiblingsSelect
       var myRelevantChildren = document.querySelectorAll(parent + " " + child);
       var myRelevantChild = myRelevantChildren[index];
       var myParent = myRelevantChild.parentNode;
+      console.log(myRelevantChildren);
+      console.log(myRelevantChild);
+      console.log(myParent);
       return Array.prototype.indexOf.call(myParent.children, myRelevantChild);
    }, theSingularParentSelector, theSiblingsSelector, theZeroIndexedOccurence);
 
@@ -96,14 +99,24 @@ async function triggerAddPokemonModal(theIndex){
    // "+ Add Pokemon" on the page, NOT the "Add Pokemon" within the modal,
    // that one is classed "save-poke"
    var mySelector = await buildAddPokemonSelector(theIndex);   
+   await clickViaJavascript(mySelector);
+}
+
+async function clickViaJavascript(theSelector){
+   // sometimes the built in page.click won't work, so use this
+   
    await page.evaluateHandle((selector) => {
       var myElement = document.querySelector(selector);
       myElement.click();
-   }, mySelector);
-   
-   // page.click won't work for OPPOSING_INDEX since it's not scrolled in view
-   // and .scrollIntoView() mysteriously isn't working
-   //await page.click(mySelector);
+   }, theSelector);
+}
+
+async function setInputViaJavascript(theInputSelector, theInputValue){
+   await page.evaluateHandle((selector, newValue) => {
+      var myElement = document.querySelector(selector);
+      myElement.value = newValue;
+      myElement.dispatchEvent(new Event("change"));
+   }, theInputSelector, theInputValue);
 }
 
 async function buildAddPokemonSelector(theIndex){
@@ -112,4 +125,27 @@ async function buildAddPokemonSelector(theIndex){
    return '.poke-select-container .poke.multi:nth-child(' + myNthChildNumber + ') .add-poke-btn';
 }
 
-// async function addPokemon
+async function inputAddMonData(theAddMonData, theIndex){
+   await triggerAddPokemonModal(theIndex);
+   
+   await page.select('.modal .poke-select', theAddMonData.name);  
+   await page.select('.modal .move-select.fast', theAddMonData.fastMove);  
+   
+   var myFirstChargedMoveInputSelector = await buildChargedMoveInputSelector(0);
+   await page.select(myFirstChargedMoveInputSelector, theAddMonData.chargeMove1);  
+   var mySecondChargedMoveInputSelector = await buildChargedMoveInputSelector(1);
+   await page.select(mySecondChargedMoveInputSelector, theAddMonData.chargeMove2);  
+
+   await clickViaJavascript('.modal .advanced');
+   await setInputViaJavascript('.modal input.iv[iv=atk]', theAddMonData.ivAttack);
+   await setInputViaJavascript('.modal input.iv[iv=def]', theAddMonData.ivDefence);
+   await setInputViaJavascript('.modal input.iv[iv=hp]', theAddMonData.ivHp);
+   
+   await clickViaJavascript('.modal .save-poke.button');
+}
+
+async function buildChargedMoveInputSelector(theIndex){
+   var myIndexWithinParent = await getIndexWithinParent('.modal .move-select-container', '.move-select.charged', theIndex);
+   var myNthChildNumber = myIndexWithinParent + 1;
+   return '.modal .move-select-container .move-select.charged:nth-child(' + myNthChildNumber + ')'
+}

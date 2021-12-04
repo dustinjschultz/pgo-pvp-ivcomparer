@@ -34,7 +34,9 @@ const AddMonData = require('./addMonClass.js');
       
    let myAddMonData = new AddMonData('a', 'b', 'c', 'd', 1, 2, 3);
    console.log(myAddMonData);
-         
+   
+   await clickAddPokemon(FRIENDLY_INDEX);
+   
    setTimeout(() => {  console.log("World!"); }, 20000);
 
 })();
@@ -88,6 +90,26 @@ async function buildShieldSelector(theIndex){
    var myIndexWithinParent = await getIndexWithinParent('.poke-select-container', '.poke.multi', theIndex);   
    var myNthChildNumber = myIndexWithinParent + 1;
    return '.poke-select-container .poke.multi:nth-child(' + myNthChildNumber + ') .shield-select';
+}
+
+async function clickAddPokemon(theIndex){
+   // "+ Add Pokemon" on the page, NOT the "Add Pokemon" within the modal,
+   // that one is classed "save-poke"
+   var mySelector = await buildAddPokemonSelector(theIndex);   
+   await page.evaluateHandle((selector) => {
+      var myElement = document.querySelector(selector);
+      myElement.click();
+   }, mySelector);
+   
+   // page.click won't work for OPPOSING_INDEX since it's not scrolled in view
+   // and .scrollIntoView() mysteriously isn't working
+   //await page.click(mySelector);
+}
+
+async function buildAddPokemonSelector(theIndex){
+   var myIndexWithinParent = await getIndexWithinParent('.poke-select-container', '.poke.multi', theIndex);   
+   var myNthChildNumber = myIndexWithinParent + 1;
+   return '.poke-select-container .poke.multi:nth-child(' + myNthChildNumber + ') .add-poke-btn';
 }
 
 // async function addPokemon

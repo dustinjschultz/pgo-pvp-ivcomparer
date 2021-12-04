@@ -32,10 +32,10 @@ const AddMonData = require('./addMonClass.js');
    await setShieldCount(myFriendlyShieldCount, FRIENDLY_INDEX);
    await setShieldCount(myOpposingShieldCount, OPPOSING_INDEX);
       
-   let myAddMonData = new AddMonData('a', 'b', 'c', 'd', 1, 2, 3);
+   let myAddMonData = new AddMonData('alakazam', 'PSYCHO_CUT', 'PSYCHIC', 'FUTURE_SIGHT', 1, 2, 3);
    console.log(myAddMonData);
    
-   await clickAddPokemon(FRIENDLY_INDEX);
+   await triggerAddPokemonModal(FRIENDLY_INDEX);
    
    setTimeout(() => {  console.log("World!"); }, 20000);
 
@@ -92,7 +92,7 @@ async function buildShieldSelector(theIndex){
    return '.poke-select-container .poke.multi:nth-child(' + myNthChildNumber + ') .shield-select';
 }
 
-async function clickAddPokemon(theIndex){
+async function triggerAddPokemonModal(theIndex){
    // "+ Add Pokemon" on the page, NOT the "Add Pokemon" within the modal,
    // that one is classed "save-poke"
    var mySelector = await buildAddPokemonSelector(theIndex);   
